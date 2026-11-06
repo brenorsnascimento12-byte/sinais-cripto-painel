@@ -101,7 +101,8 @@ function ecraChave(erro) {
     onsubmit: (e) => {
       e.preventDefault();
       const v = input.value.trim();
-      if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(v)) { erroP.textContent = 'Isto não parece uma chave do GitHub (começa por github_pat_).'; return; }
+      // Só chaves «fine-grained» (github_pat_): podem ficar limitadas a um repositório e a só leitura.
+      if (!/^github_pat_[A-Za-z0-9_]{20,}$/.test(v)) { erroP.textContent = 'Isto não parece uma chave fine-grained do GitHub (começa por github_pat_).'; return; }
       escrever(K_CHAVE, v);
       input.value = '';
       carregar();
@@ -140,8 +141,9 @@ function desenhar(d, origem) {
   if (!d || typeof d !== 'object') return mensagem('O ficheiro de dados não é válido.');
   const avisos = [];
   if (origem === 'sem_rede') avisos.push(`Sem rede: a mostrar os dados guardados de ${dataCurta(d.dia)}.`);
+  if (d.falhou && d.falhou.dia) avisos.push(`A corrida de ${dataCurta(d.falhou.dia)} falhou: a mostrar a última decisão boa, de ${dataCurta(d.dia)}. Vê o separador Actions no GitHub.`);
   const agoraLx = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Lisbon' });
-  if (typeof d.dia === 'string' && d.dia < agoraLx.slice(0, 10) && Number(agoraLx.slice(11, 13)) >= 9)
+  if (!d.falhou && typeof d.dia === 'string' && d.dia < agoraLx.slice(0, 10) && Number(agoraLx.slice(11, 13)) >= 9)
     avisos.push(`Ainda sem a corrida de hoje: a mostrar os dados de ${dataCurta(d.dia)}.`);
   const e = d.estado || {};
   const falhas = [...(e.agentes_falharam || []), ...(e.fontes_falharam || [])];
@@ -160,7 +162,7 @@ function desenhar(d, origem) {
   if (!d.hoje) return render(el('div', { class: 'wrap' }, topo, ...caixaAvisos,
     el('div', { class: 'cartao' }, 'Ainda não há decisão para este dia. Vê o separador Actions no GitHub.'), rodape));
   render(el('div', { class: 'wrap' }, topo, ...caixaAvisos,
-    el('div', { class: 'topo' }, el('div', { class: 'th' }, seguro(blocoHoje, d)), ...seguro(mosaicos, d)),
+    el('div', { class: 'topo' }, el('div', { class: 'th' }, seguro(blocoHoje, d)), ...[seguro(mosaicos, d)].flat()),
     el('div', { class: 'secs' }, seguro(secGrafico, d), seguro(secGatilhos, d), seguro(secRendimento, d), seguro(secCarteira, d),
       seguro(secMercado, d), seguro(secAgentes, d), seguro(secHistorico, d), seguro(secNormal, d)),
     rodape));
@@ -189,6 +191,11 @@ function blocoHoje(d) {
   if (h.estado_ui === 'sem_acao') detalhe = `O peso está entre ${pctSem(banda[0])} e ${pctSem(banda[1])}: nada a fazer hoje. Os preços que fariam o sistema agir estão em «Preços-gatilho».`;
   if (h.modo === 'simulacao') detalhe += ' Simulação: se começasses hoje com 100 USDC. Nada a fazer até iniciares a carteira.';
   if (h.estado_ui === 'travao') detalhe += ' As vendas continuam permitidas; o travão só desliga quando correres «retomar».';
+  const jaRegistou = acao && h.operacao_registada_hoje;
+  if (jaRegistou) {
+    titulo = 'Operação de hoje registada';
+    detalhe = 'Já registaste uma operação hoje. A recomendação da manhã deixa de valer: a próxima chega amanhã, com a carteira atualizada.';
+  }
   const pos = (x) => `${Math.max(0, Math.min(100, (fin(x) ? x : 0) * 100))}%`;
   const inclin = fin(h.mm200) && fin(h.mm200_ha20) ? (h.mm200 > h.mm200_ha20 ? ', que está a subir' : ', que está a descer') : '';
   const v = h.veto || {};
@@ -216,7 +223,7 @@ function blocoHoje(d) {
       el('span', { style: `font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:${A[1]}` }, A[0]),
       el('span', { style: 'font-size:26px;font-weight:700;line-height:1.2' }, titulo),
       el('span', { style: 'font-size:14px;line-height:1.5;color:#B7BFCC' }, detalhe),
-      acao && h.modo === 'real' && linkRegistar(d, 'Registar no GitHub depois de executar', 'btn')),
+      acao && !jaRegistou && h.modo === 'real' && linkRegistar(d, 'Registar no GitHub depois de executar', 'btn')),
     el('div', { class: 'sec', style: 'display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;border-top:1px solid var(--borda);padding-top:12px' },
       el('span', {}, linhaVeto), el('span', {}, 'Ordens sempre ', el('strong', { style: 'color:var(--texto)' }, 'limite'), ' no Kraken Pro')));
 }
@@ -231,8 +238,8 @@ function mosaicos(d) {
   const dif = fin(m.valor) && fin(m.dca_valor) ? m.valor - m.dca_valor : null;
   const a = real ? [
     mosaico('#rendimento', 'Valor da carteira', `${num(m.valor)} USDC`, `depositado ${num(m.depositado)}`),
-    mosaico('#rendimento', 'Rendimento', `${sinal(m.ganho)} €`, `${pct(m.ganho_pct)} · estratégia ${pct(m.estrategia_pct)}`, cor(m.ganho)),
-    mosaico('#carteira', 'vs referência «só BTC»', `${sinal(dif)} €`, `DCA vale ${num(m.dca_valor)}`, cor(dif)),
+    mosaico('#rendimento', 'Rendimento', `${sinal(m.ganho)} USDC`, `${pct(m.ganho_pct)} · estratégia ${pct(m.estrategia_pct)}`, cor(m.ganho)),
+    mosaico('#carteira', 'vs referência «só BTC»', `${sinal(dif)} USDC`, `DCA vale ${num(m.dca_valor)}`, cor(dif)),
     mosaico('#historico', 'Próximo depósito', dataCurta(m.proximo_deposito), m.proximo_deposito ? `daqui a ${diasAte(m.proximo_deposito, d.dia)} dias · 50 €` : '')
   ] : [
     mosaico('#rendimento', 'Carteira', 'Por iniciar', 'Regista «iniciar» no GitHub quando quiseres começar'),
@@ -336,7 +343,7 @@ function secRendimento(d) {
   const r = d.rendimento[ui.periodoR] || d.rendimento.inicio || {};
   const real = r.real || {}, dca = r.dca || {};
   const L = [
-    ['Ganho', (x) => `${sinal(x.ganho)} €`, (x) => x.ganho],
+    ['Ganho (USDC)', (x) => sinal(x.ganho), (x) => x.ganho],
     ['Rendimento simples', (x) => pct(x.simples_pct), (x) => x.simples_pct],
     ['Estratégia (pond. pelo tempo)', (x) => pct(x.estrategia_pct), (x) => x.estrategia_pct],
     ['Taxa anual equivalente', (x) => pct(x.taxa_anual, 0), (x) => x.taxa_anual],
@@ -386,11 +393,11 @@ function secMercado(d) {
       el('div', { style: 'display:flex;flex-direction:column;gap:2px;min-width:0' }, el('span', { style: 'font-weight:600;font-size:14px' }, e.evento),
         el('span', { class: 'sec', style: 'font-size:12px' }, `${dataCurta(e.data)}${e.detalhe ? ' · ' + e.detalhe : ''}`)),
       el('span', { class: 'mono', style: `font-size:18px;font-weight:700;white-space:nowrap;color:${diasAte(e.data, d.dia) <= 7 ? 'var(--neutro)' : 'var(--texto)'}` }, `${diasAte(e.data, d.dia)} dias`))),
-    fg.length && el('span', { style: 'font-size:13px;color:#B7BFCC' }, 'Fear & Greed, últimos 7 dias'),
-    fg.length && el('div', { style: 'display:flex;gap:6px;align-items:flex-end;height:74px' }, ...fg.map((b) => el('div', { style: 'flex:1;display:flex;flex-direction:column;align-items:center;gap:4px' },
+    fg.length > 0 && el('span', { style: 'font-size:13px;color:#B7BFCC' }, 'Fear & Greed, últimos 7 dias'),
+    fg.length > 0 && el('div', { style: 'display:flex;gap:6px;align-items:flex-end;height:74px' }, ...fg.map((b) => el('div', { style: 'flex:1;display:flex;flex-direction:column;align-items:center;gap:4px' },
       el('span', { class: 'mono sec', style: 'font-size:11px' }, String(b.valor)),
       el('div', { title: `${dataCurta(b.data)}: ${b.classe}`, style: `width:100%;height:${Math.max(2, b.valor / 100 * 52)}px;border-radius:4px 4px 0 0;background:${b.valor < 25 ? 'var(--baixa)' : b.valor < 45 ? 'var(--neutro)' : b.valor <= 55 ? 'var(--sec)' : 'var(--alta)'}` })))),
-    etf.length && el('span', { style: 'font-size:13px;color:#B7BFCC' }, 'Fluxos dos ETF de BTC (milhões $) · últimos 5 dias: ', el('strong', { class: 'mono', style: `color:${cor(soma5)}` }, sinal(soma5).replace(/,\d+$/, ''))),
+    etf.length > 0 && el('span', { style: 'font-size:13px;color:#B7BFCC' }, 'Fluxos dos ETF de BTC (milhões $) · últimos 5 dias: ', el('strong', { class: 'mono', style: `color:${cor(soma5)}` }, sinal(soma5).replace(/,\d+$/, ''))),
     ...etf.map((e) => el('div', { style: 'display:grid;grid-template-columns:52px minmax(0,1fr) 60px;gap:8px;align-items:center;font-size:12px' },
       el('span', { class: 'mono sec' }, dataCurta(e.data)),
       el('div', { style: 'position:relative;height:10px;background:var(--fundo2);border-radius:4px' },

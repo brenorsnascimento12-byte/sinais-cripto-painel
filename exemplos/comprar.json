@@ -37,7 +37,8 @@
   "valor": 191.53111928888222,
   "regime_anterior": null,
   "estado_ui": "comprar",
-  "proxima_ordem_possivel": null
+  "proxima_ordem_possivel": null,
+  "operacao_registada_hoje": false
  },
  "base_data": "2026-11-05",
  "gatilhos": [
@@ -51,7 +52,7 @@
    "tipo": "regime",
    "preco": 73191.51,
    "texto": "Regime passa a neutro",
-   "detalhe": "alvo 30%: vende uma parte"
+   "detalhe": "fecho abaixo da média: alvo 30%, vende uma parte"
   },
   {
    "tipo": "zona_barata",
@@ -2174,7 +2175,7 @@
     "taxa_anual": null,
     "comissoes": 0.1645,
     "realizado": 0,
-    "por_realizar": -8.468880711117748
+    "por_realizar": -2.676803667321508
    },
    "dca": {
     "ganho": -3.929050228965309,
@@ -2183,7 +2184,7 @@
     "taxa_anual": null,
     "comissoes": 0.25,
     "realizado": 0,
-    "por_realizar": -8.157388997488141
+    "por_realizar": -3.929050228965309
    }
   },
   "ano": {
@@ -2194,7 +2195,7 @@
     "taxa_anual": null,
     "comissoes": 0.60985,
     "realizado": 0,
-    "por_realizar": -8.468880711117748
+    "por_realizar": -8.468880711117777
    },
    "dca": {
     "ganho": -8.157388997488141,
@@ -2214,7 +2215,7 @@
     "taxa_anual": null,
     "comissoes": 0.60985,
     "realizado": 0,
-    "por_realizar": -8.468880711117748
+    "por_realizar": -8.468880711117777
    },
    "dca": {
     "ganho": -8.157388997488141,

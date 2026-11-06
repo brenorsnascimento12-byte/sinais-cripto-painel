@@ -37,7 +37,8 @@
   "valor": 100.0,
   "regime_anterior": null,
   "estado_ui": "simulacao",
-  "proxima_ordem_possivel": null
+  "proxima_ordem_possivel": null,
+  "operacao_registada_hoje": false
  },
  "base_data": "2026-11-05",
  "gatilhos": [
@@ -45,7 +46,7 @@
    "tipo": "regime",
    "preco": 73191.51,
    "texto": "Regime passa a neutro",
-   "detalhe": "alvo 30%: vende uma parte"
+   "detalhe": "fecho abaixo da média: alvo 30%, vende uma parte"
   },
   {
    "tipo": "zona_barata",
