@@ -1,0 +1,11 @@
+{
+  "name": "Sinais cripto",
+  "short_name": "Sinais",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B0E11",
+  "theme_color": "#0B0E11",
+  "lang": "pt-PT",
+  "icons": [{"src": "icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}]
+}

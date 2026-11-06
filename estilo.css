@@ -1,0 +1,37 @@
+:root{--fundo:#0B0E11;--cartao:#12161C;--fundo2:#0F1318;--borda:#252C38;--texto:#E8EBF0;--sec:#98A1B2;--ter:#7F889A;
+--alta:#34C38F;--neutro:#F5B83D;--baixa:#F26B78;--azul:#9CC2FF;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fundo);color:var(--texto);font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;-webkit-text-size-adjust:100%}
+a{color:var(--azul)}a:hover{color:#C9DDFF}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+.painel{container-type:inline-size;padding:20px 16px 40px;min-height:100vh}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.cartao{background:var(--cartao);border:1px solid var(--borda);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.fundo2{background:var(--fundo2);border-radius:10px}
+.mono{font-family:var(--mono)}.sec{color:var(--sec)}.ter{color:var(--ter)}
+h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em}h2{margin:0;font-size:16px;font-weight:600}h3{margin:0;font-size:15px;font-weight:600}
+.topo{display:grid;gap:16px;grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr);grid-template-areas:"a h b"}
+.ta{grid-area:a}.th{grid-area:h;min-width:0}.tb{grid-area:b}.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.mosaico{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:14px;background:var(--cartao);border:1px solid var(--borda);text-decoration:none;color:inherit;min-height:44px;min-width:0}
+.mosaico .n{font-family:var(--mono);font-size:22px;font-weight:700;overflow-wrap:anywhere}.mosaico .r{font-size:12px;color:var(--sec)}
+.botao-icone{min-width:44px;min-height:44px;background:var(--cartao);border:1px solid var(--borda);border-radius:10px;font-size:18px}
+.secs{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.larga{grid-column:1/-1}
+.agentes{display:grid;gap:12px;grid-template-columns:repeat(5,minmax(0,1fr))}
+.chip{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:14px;padding:6px 12px;border-radius:999px}
+.botoes{display:flex;gap:6px;flex-wrap:wrap}
+.botoes button{min-height:36px;min-width:48px;padding:0 10px;border-radius:8px;border:1px solid #2E3644;background:transparent;color:var(--sec);font-size:12px}
+.botoes button[aria-pressed="true"]{background:#1A2333;color:var(--azul)}
+.degrau{display:grid;grid-template-columns:110px minmax(0,1fr) 64px;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--fundo2);border:1px solid transparent}
+.degrau>span:first-child{white-space:nowrap}
+.grafico{position:relative;border-radius:10px;overflow:hidden;background:var(--fundo2)}
+.grafico svg{position:absolute;inset:0;width:100%;height:100%}
+.aviso{display:flex;gap:10px;align-items:flex-start;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 0}tbody tr{border-top:1px solid var(--borda)}
+td{text-align:right;font-family:var(--mono)}tbody th{text-align:left;font-weight:400;color:#B7BFCC}
+.btn{min-height:48px;border:none;border-radius:10px;background:var(--azul);color:var(--fundo);font-weight:700;font-size:15px;padding:0 16px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;text-align:center}
+.btn:hover{color:var(--fundo);background:#B7D3FF}
+input{min-height:48px;background:var(--cartao);border:1px solid #2E3644;border-radius:10px;color:var(--texto);padding:0 14px;font-family:var(--mono);font-size:16px;width:100%}
+@container (max-width:1000px){.topo{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"h h" "a b"}.secs{grid-template-columns:minmax(0,1fr)}.agentes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container (max-width:560px){.agentes{grid-template-columns:minmax(0,1fr)}.mosaico .n{font-size:18px}.mosaico{padding:12px}
+.degrau{grid-template-columns:92px minmax(0,1fr) 50px;gap:8px;padding:10px}.degrau>span:first-child{font-size:13px}.cartao{padding:16px}}

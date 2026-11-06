@@ -1,0 +1,16 @@
+{
+ "v": 1,
+ "dia": "2026-11-06",
+ "base_data": "2026-11-05",
+ "hoje": {
+  "modo": "real",
+  "regime": "alta",
+  "preco": 75979.9,
+  "mm200": 73191.5,
+  "alvo": 0.6,
+  "banda": 0.1,
+  "peso": 0.59,
+  "acoes": [],
+  "estado_ui": "sem_acao"
+ }
+}
