@@ -139,12 +139,12 @@ function mensagem(t) {
 function desenhar(d, origem) {
   ultimo = { d, origem };
   if (!d || typeof d !== 'object') return mensagem('O ficheiro de dados não é válido.');
-  const avisos = [];
-  if (origem === 'sem_rede') avisos.push(`Sem rede: a mostrar os dados guardados de ${dataCurta(d.dia)}.`);
-  if (d.falhou && d.falhou.dia) avisos.push(`A corrida de ${dataCurta(d.falhou.dia)} falhou: a mostrar a última decisão boa, de ${dataCurta(d.dia)}. Vê o separador Actions no GitHub.`);
+  const avisos = [];   // [texto, mostrar o botão de correr a recolha?]
+  if (origem === 'sem_rede') avisos.push([`Sem rede: a mostrar os dados guardados de ${dataCurta(d.dia)}.`, false]);
+  if (d.falhou && d.falhou.dia) avisos.push([`A corrida de ${dataCurta(d.falhou.dia)} falhou: a mostrar a última decisão boa, de ${dataCurta(d.dia)}.`, true]);
   const agoraLx = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Lisbon' });
-  if (!d.falhou && typeof d.dia === 'string' && d.dia < agoraLx.slice(0, 10) && Number(agoraLx.slice(11, 13)) >= 9)
-    avisos.push(`Ainda sem a corrida de hoje: a mostrar os dados de ${dataCurta(d.dia)}.`);
+  if (!d.falhou && typeof d.dia === 'string' && d.dia < agoraLx.slice(0, 10) && Number(agoraLx.slice(11, 13)) >= 8)
+    avisos.push([`Ainda sem a corrida de hoje: a mostrar os dados de ${dataCurta(d.dia)}. Podes corrê-la à mão: abre a página, carrega em «Run workflow» e volta daqui a ~30 min.`, true]);
   const e = d.estado || {};
   const falhas = [...(e.agentes_falharam || []), ...(e.fontes_falharam || [])];
   const topo = el('header', { style: 'display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap' },
@@ -154,13 +154,14 @@ function desenhar(d, origem) {
       el('span', { 'aria-hidden': 'true', style: `width:8px;height:8px;border-radius:50%;background:${falhas.length ? 'var(--neutro)' : 'var(--alta)'}` }),
       el('span', {}, falhas.length ? `Falhas hoje: ${falhas.join(', ')}` : fin(e.agentes_ok) ? `${e.agentes_ok} de 5 agentes · fontes OK` : 'Estado da corrida desconhecido'),
       el('button', { type: 'button', class: 'botao-icone', 'aria-label': 'Atualizar', onclick: carregar }, '↻')));
-  const caixaAvisos = avisos.map((t) => el('div', { class: 'aviso', role: 'status', style: 'background:#2A2312;color:#F5D48A;border:1px solid #6B5320' }, t));
+  const caixaAvisos = avisos.map(([t, botao]) => el('div', { class: 'aviso', role: 'status', style: 'background:#2A2312;color:#F5D48A;border:1px solid #6B5320;flex-direction:column' },
+    el('span', {}, t), botao && botaoRecolha('btn', 'Correr a recolha agora no GitHub')));
   const rodape = el('footer', { class: 'ter', style: 'display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;padding-top:8px' },
     el('span', {}, 'Só de leitura · o sistema nunca compra nem vende: quem executa és tu'),
-    el('span', { style: 'display:flex;gap:16px' }, linkRegistar(d, 'Registar operação no GitHub'),
+    el('span', { style: 'display:flex;gap:16px;flex-wrap:wrap' }, linkRegistar(d, 'Registar operação no GitHub'), botaoRecolha(null, 'Correr a recolha à mão'),
       el('button', { type: 'button', style: 'background:none;border:none;color:var(--ter);text-decoration:underline;padding:0;font-size:12px', onclick: () => ecraChave() }, 'Trocar chave')));
   if (!d.hoje) return render(el('div', { class: 'wrap' }, topo, ...caixaAvisos,
-    el('div', { class: 'cartao' }, 'Ainda não há decisão para este dia. Vê o separador Actions no GitHub.'), rodape));
+    el('div', { class: 'cartao' }, el('span', {}, 'Ainda não há decisão para este dia.'), botaoRecolha('btn', 'Correr a recolha agora no GitHub')), rodape));
   render(el('div', { class: 'wrap' }, topo, ...caixaAvisos,
     el('div', { class: 'topo' }, el('div', { class: 'th' }, seguro(blocoHoje, d)), ...[seguro(mosaicos, d)].flat()),
     el('div', { class: 'secs' }, seguro(secGrafico, d), seguro(secGatilhos, d), seguro(secRendimento, d), seguro(secCarteira, d),
@@ -168,6 +169,12 @@ function desenhar(d, origem) {
     rodape));
 }
 function redesenhar() { if (ultimo) desenhar(ultimo.d, ultimo.origem); }
+
+// Abre a página do workflow «Recolha diária» no GitHub (lá carregas em «Run workflow»).
+// O painel não corre nada sozinho: a chave do telemóvel é só de leitura.
+function botaoRecolha(classe, texto) {
+  return el('a', { href: `https://github.com/${REPO}/actions/workflows/recolha.yml`, target: '_blank', rel: 'noopener noreferrer', class: classe }, texto);
+}
 
 function linkRegistar(d, texto, classe) {
   const href = typeof d.ligacao_registar === 'string' && d.ligacao_registar.startsWith('https://github.com/') ? d.ligacao_registar : `https://github.com/${REPO}/actions`;
