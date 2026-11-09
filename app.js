@@ -371,7 +371,17 @@ function secRendimento(d) {
 
 function secCarteira(d) {
   const c = d.carteira;
-  if (!c || !Array.isArray(c.real) || c.real.length < 2) return caixa('carteira', 'Carteira vs «só BTC»', 'Começa quando iniciares a carteira.');
+  if (!c || !Array.isArray(c.real) || !c.real.length) return caixa('carteira', 'Carteira vs «só BTC»', 'Começa quando iniciares a carteira.');
+  if (c.real.length < 2) {
+    // Primeiro dia: ainda não há linha para desenhar, mas já há valores para comparar.
+    const v = (t, x, cr) => el('div', { class: 'fundo2', style: 'padding:12px;display:flex;flex-direction:column;gap:4px;min-width:0' },
+      el('span', { class: 'sec', style: 'font-size:12px' }, t), el('span', { class: 'mono', style: `font-size:20px;font-weight:700;color:${cr}` }, `${num(x)} USDC`));
+    const dif = fin(c.real[0]) && fin(c.dca[0]) ? c.real[0] - c.dca[0] : null;
+    return caixa('carteira', 'Carteira vs «só BTC»', 'O gráfico começa amanhã, com o segundo dia de valores.', null,
+      el('div', { style: 'display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px' },
+        v('Carteira v2', c.real[0], 'var(--alta)'), v('Só BTC', c.dca[0], 'var(--neutro)'), v('Depositado', c.depositado[0], 'var(--texto)')),
+      el('span', { style: `font-size:13px;color:${cor(dif)}` }, dif == null ? '' : `Diferença: ${sinal(dif)} USDC face a ter tudo em BTC.`));
+  }
   const n = c.real.length, xs = c.real.map((_, i) => i / (n - 1));
   const vals = [...c.real, ...c.dca, ...c.depositado].filter(fin), lo = Math.min(...vals) * 0.9, hi = Math.max(...vals) * 1.05;
   const g = svg('svg', { viewBox: '0 0 1000 180', preserveAspectRatio: 'none', role: 'img', 'aria-label': 'Valor da carteira, da referência e do depositado' });
